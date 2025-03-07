@@ -1,0 +1,152 @@
+CREATE DATABASE dbexp5;
+USE dbexp5;
+
+CREATE TABLE Sailors (
+    sid INT PRIMARY KEY,
+    sname VARCHAR(50) NOT NULL,
+    rating INT,
+    age DECIMAL(4,1)
+);
+
+CREATE TABLE Boat (
+    bid INT PRIMARY KEY,
+    bname VARCHAR(50) NOT NULL,
+    color VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Reserves (
+    sid INT,
+    bid INT,
+    date DATE,
+    PRIMARY KEY (sid, bid, date),
+    FOREIGN KEY (sid) REFERENCES Sailors(sid) ON DELETE CASCADE,
+    FOREIGN KEY (bid) REFERENCES Boat(bid) ON DELETE CASCADE
+);
+
+INSERT INTO Sailors (sid, sname, rating, age) VALUES
+(1, 'Alice', 5, 25.3),
+(2, 'Bob', 7, 30.5),
+(3, 'Charlie', 6, 27.8),
+(4, 'David', 8, 35.0);
+
+INSERT INTO Boat (bid, bname, color) VALUES
+(101, 'Speedster', 'Red'),
+(102, 'Wave Rider', 'Blue'),
+(103, 'Ocean Breeze', 'Green'),
+(104, 'Storm Chaser', 'Red');
+
+INSERT INTO Reserves (sid, bid, date) VALUES
+(1, 101, '2024-03-01'),
+(2, 102, '2024-03-02'),
+(3, 101, '2024-03-02'),
+(4, 103, '2024-03-03'),
+(2, 101, '2024-03-04');
+select *from sailors,reserves where sailors.sid=reserves.sid and bid=101;
+SELECT DISTINCT b.bname 
+FROM Boat b
+JOIN Reserves r ON b.bid = r.bid
+JOIN Sailors s ON r.sid = s.sid
+WHERE s.sname = 'Bob';
+SELECT DISTINCT s.sname, s.age
+FROM Sailors s
+JOIN Reserves r ON s.sid = r.sid
+JOIN Boat b ON r.bid = b.bid
+WHERE b.color = 'Red'
+ORDER BY s.age;
+SELECT DISTINCT s.sname
+FROM Sailors s
+JOIN Reserves r ON s.sid = r.sid;
+SELECT DISTINCT s.sid, s.sname
+FROM Sailors s
+JOIN Reserves r1 ON s.sid = r1.sid
+JOIN Reserves r2 ON s.sid = r2.sid
+WHERE r1.date = r2.date AND r1.bid <> r2.bid;
+SELECT DISTINCT r.sid
+FROM Reserves r
+JOIN Boat b ON r.bid = b.bid
+WHERE b.color IN ('Red', 'Green');
+SELECT sname, age
+FROM Sailors
+ORDER BY age ASC
+LIMIT 1;
+SELECT COUNT(DISTINCT sname) AS unique_sailor_names
+FROM Sailors;
+SELECT rating, AVG(age) AS avg_age
+FROM Sailors
+GROUP BY rating;
+SELECT rating, AVG(age) AS avg_age
+FROM Sailors
+GROUP BY rating
+HAVING COUNT(*) >= 2;
+SELECT s.sname, r.bid 
+FROM Sailors s
+INNER JOIN Reserves r ON s.sid = r.sid;
+SELECT s.sname, s.age, b.bname, b.color
+FROM Sailors s
+INNER JOIN Reserves r ON s.sid = r.sid
+INNER JOIN Boat b ON r.bid = b.bid;
+SELECT s.sname, COALESCE(r.bid, 'Not Reserved') AS boat_number
+FROM Sailors s
+LEFT OUTER JOIN Reserves r ON s.sid = r.sid;
+SELECT s.sname, s.age, COALESCE(b.bname, 'Not Reserved') AS boat_name
+FROM Sailors s
+LEFT OUTER JOIN Reserves r ON s.sid = r.sid
+LEFT OUTER JOIN Boat b ON r.bid = b.bid;
+SELECT sname, bid, bname
+FROM Sailors
+NATURAL JOIN Reserves
+NATURAL JOIN Boat;
+SELECT sname, age
+FROM Sailors
+NATURAL LEFT OUTER JOIN Reserves
+WHERE bid IS NULL;
+SELECT DISTINCT s2.sname, r2.bid, r2.date
+FROM Reserves r1
+JOIN Sailors s1 ON r1.sid = s1.sid
+JOIN Reserves r2 ON r1.bid = r2.bid AND r1.date = r2.date
+JOIN Sailors s2 ON r2.sid = s2.sid
+WHERE s1.sname = 'Alice' AND s2.sname <> 'Alice';
+SELECT s.sname, COUNT(r.bid) AS total_reservations
+FROM Sailors s
+LEFT JOIN Reserves r ON s.sid = r.sid
+GROUP BY s.sname;
+SELECT s.sname, s.age, COUNT(r.bid) AS reservation_count
+FROM Sailors s
+JOIN Reserves r ON s.sid = r.sid
+GROUP BY s.sname, s.age;
+SELECT DISTINCT s2.sname, s2.age
+FROM Sailors s1
+JOIN Reserves r1 ON s1.sid = r1.sid
+JOIN Reserves r2 ON r1.bid = r2.bid
+JOIN Sailors s2 ON r2.sid = s2.sid
+WHERE s1.sname = 'Bob' AND s2.age > s1.age AND s2.sname <> 'Bob';
+SELECT sname
+FROM Sailors
+LEFT JOIN Reserves ON Sailors.sid = Reserves.sid
+WHERE Reserves.bid IS NULL;
+SELECT s.sname
+FROM Sailors s
+JOIN Reserves r ON s.sid = r.sid
+JOIN Boat b ON r.bid = b.bid
+WHERE b.color = 'Red'
+GROUP BY s.sname
+HAVING COUNT(DISTINCT r.bid) = (SELECT COUNT(*) FROM Boat WHERE color = 'Red');
+SELECT DISTINCT s.sname
+FROM Sailors s
+JOIN Reserves r1 ON s.sid = r1.sid
+JOIN Reserves r2 ON s.sid = r2.sid
+WHERE DATEDIFF(r2.date, r1.date) = 1;
+SELECT b.bname
+FROM Boat b
+LEFT JOIN Reserves r ON b.bid = r.bid
+WHERE r.bid IS NULL;
+SELECT s.sname, s.age
+FROM Sailors s
+JOIN Reserves r ON s.sid = r.sid
+JOIN Boat b ON r.bid = b.bid
+WHERE b.color = 'Green'
+ORDER BY s.age DESC
+LIMIT 1;
+
+
+
