@@ -1,0 +1,143 @@
+create database dbexp7;
+use dbexp7;
+CREATE TABLE Sailors (
+    sid INT PRIMARY KEY,
+    sname VARCHAR(50),
+    rating INT,
+    age DECIMAL(5,2)
+);
+
+CREATE TABLE Boat (
+    bid INT PRIMARY KEY,
+    bname VARCHAR(50),
+    color VARCHAR(20),
+    rating INT
+);
+
+CREATE TABLE Reserves (
+    sid INT,
+    bid INT,
+    date DATE,
+    PRIMARY KEY (sid, bid, date),
+    FOREIGN KEY (sid) REFERENCES Sailors(sid),
+    FOREIGN KEY (bid) REFERENCES Boat(bid)
+);
+INSERT INTO Sailors (sid, sname, rating, age) VALUES
+(1, 'Alice', 5, 25.0),
+(2, 'Bob', 3, 30.0),
+(3, 'Charlie', 4, 35.0),
+(4, 'David', 2, 28.0),
+(5, 'Eve', 3, 22.0),
+(6, 'Frank', 4, 40.0),
+(7, 'Grace', 5, 27.0);
+
+-- Insert Boats
+INSERT INTO Boat (bid, bname, color, rating) VALUES
+(101, 'Seafarer', 'Red', 3),
+(102, 'Wave Rider', 'Blue', 4),
+(103, 'Ocean Breeze', 'Green', 5),
+(104, 'Storm Chaser', 'Blue', 2),
+(105, 'Sea Pearl', 'Red', 3),
+(106, 'Black Pearl', 'Black', 4);
+
+INSERT INTO Reserves (sid, bid, date) VALUES
+(1, 101, '2025-03-01'), 
+(1, 102, '2025-03-02'), 
+(2, 103, '2025-03-01'), 
+(2, 105, '2025-03-02'), 
+(3, 104, '2025-03-01'), 
+(3, 101, '2025-03-01'), 
+(4, 102, '2025-03-02'), 
+(5, 106, '2025-03-02'), 
+(6, 101, '2025-03-01'), 
+(7, 103, '2025-03-01'); 
+CREATE TABLE Sailors (
+    sid INT PRIMARY KEY,
+    sname VARCHAR(50),
+    rating INT,
+    age DECIMAL(5,2)
+);
+
+CREATE TABLE Boat (
+    bid INT PRIMARY KEY,
+    bname VARCHAR(50),
+    color VARCHAR(20),
+    rating INT
+);
+
+CREATE TABLE Reserves (
+    sid INT,
+    bid INT,
+    date DATE,
+    PRIMARY KEY (sid, bid, date),
+    FOREIGN KEY (sid) REFERENCES Sailors(sid),
+    FOREIGN KEY (bid) REFERENCES Boat(bid)
+);
+
+-- Insert Sample Data
+INSERT INTO Sailors (sid, sname, rating, age) VALUES
+(1, 'Alice', 5, 25.0),
+(2, 'Bob', 3, 30.0),
+(3, 'Charlie', 4, 35.0),
+(4, 'David', 2, 28.0),
+(5, 'Eve', 3, 22.0),
+(6, 'Frank', 4, 40.0),
+(7, 'Grace', 5, 27.0);
+
+INSERT INTO Boat (bid, bname, color, rating) VALUES
+(101, 'Seafarer', 'Red', 3),
+(102, 'Wave Rider', 'Blue', 4),
+(103, 'Ocean Breeze', 'Green', 5),
+(104, 'Storm Chaser', 'Blue', 2),
+(105, 'Sea Pearl', 'Red', 3),
+(106, 'Black Pearl', 'Black', 4);
+
+INSERT INTO Reserves (sid, bid, date) VALUES
+(1, 101, '2025-03-01'),
+(1, 102, '2025-03-02'),
+(2, 103, '2025-03-01'),
+(2, 105, '2025-03-02'),
+(3, 104, '2025-03-01'),
+(3, 101, '2025-03-01'),
+(4, 102, '2025-03-02'),
+(5, 106, '2025-03-02'),
+(6, 101, '2025-03-01'),
+(7, 103, '2025-03-01');
+
+ select s.* FROM Sailors s JOIN Reserves r ON s.sid = r.sid WHERE r.bid = 101;
+
+SELECT b.bname FROM Boat b JOIN Reserves r ON b.bid = r.bid JOIN Sailors s ON r.sid = s.sid WHERE s.sname = 'Bob';
+SELECT DISTINCT s.sname,s.age FROM Sailors s JOIN Reserves r ON s.sid = r.sid JOIN Boat b ON r.bid = b.bid WHERE b.color = 'Red' ORDER BY s.age;
+SELECT DISTINCT s.sname FROM Sailors s JOIN Reserves r ON s.sid = r.sid;
+
+SELECT s.sid, s.sname FROM Sailors s JOIN Reserves r ON s.sid = r.sid GROUP BY s.sid, r.date HAVING COUNT(DISTINCT r.bid) >= 2;
+
+
+SELECT DISTINCT s.sid FROM Sailors s JOIN Reserves r ON s.sid = r.sid JOIN Boat b ON r.bid = b.bid WHERE b.color IN ('Red', 'Green');
+
+SELECT sname, age FROM Sailors ORDER BY age LIMIT 1;
+
+SELECT COUNT(DISTINCT sname) FROM Sailors;
+
+SELECT rating, AVG(age) AS avg_age FROM Sailors GROUP BY rating;
+
+SELECT rating, AVG(age) AS avg_age FROM Sailors GROUP BY rating HAVING COUNT(sid) >= 2;
+
+SELECT sname FROM Sailors WHERE sid NOT IN (SELECT DISTINCT sid FROM Reserves);
+
+SELECT s.sname FROM Sailors s JOIN Reserves r ON s.sid = r.sid JOIN Boat b ON r.bid = b.bid WHERE b.color = 'Blue' GROUP BY s.sname HAVING COUNT(DISTINCT b.bid) = (SELECT COUNT(*) FROM Boat WHERE color = 'Blue');
+
+SELECT s.sname FROM Sailors s JOIN Reserves r ON s.sid = r.sid GROUP BY s.sid ORDER BY COUNT(r.bid) DESC LIMIT 1;
+
+SELECT DISTINCT b.bname FROM Boat b JOIN Reserves r ON b.bid = r.bid JOIN Sailors s ON r.sid = s.sid WHERE s.age > 30;
+
+SELECT s.rating, COUNT(DISTINCT s.sid) FROM Sailors s JOIN Reserves r ON s.sid = r.sid GROUP BY s.rating;
+
+SELECT DISTINCT s1.sname FROM Sailors s1 JOIN Reserves r1 ON s1.sid = r1.sid JOIN Reserves r2 ON r1.bid = r2.bid AND r1.sid <> r2.sid;
+
+SELECT DISTINCT s.sname FROM Sailors s JOIN Reserves r ON s.sid = r.sid JOIN Boat b ON r.bid = b.bid WHERE b.color <> 'Red' AND r.date IN (SELECT r2.date FROM Reserves r2 JOIN Sailors s2 ON r2.sid = s2.sid WHERE s2.sname = 'Bob');
+
+SELECT DISTINCT s.sname FROM Sailors s JOIN Reserves r ON s.sid = r.sid JOIN Boat b ON r.bid = b.bid WHERE b.rating > (SELECT AVG(rating) FROM Boat);
+
+CREATE VIEW SailorReservations AS SELECT s.sname, r.bid FROM Sailors s JOIN Reserves r ON s.sid = r.sid;
+CREATE VIEW SailorSummary AS SELECT s.sname, s.age, COUNT(r.bid) AS boats_reserved FROM Sailors s LEFT JOIN Reserves r ON s.sid = r.sid GROUP BY s.sname, s.age;
