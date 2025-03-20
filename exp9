@@ -1,0 +1,113 @@
+create database dbexp9;
+use dbexp9;
+CREATE TABLE employees (
+    id INT PRIMARY KEY,
+    name VARCHAR(50),
+    salary DECIMAL(10,2),
+    department VARCHAR(50) 
+);
+CREATE TABLE departments (
+    id INT PRIMARY KEY,             
+    name VARCHAR(50) UNIQUE         
+);
+START TRANSACTION;
+SAVEPOINT SP1;
+
+
+ROLLBACK TO SP1;
+
+
+COMMIT;
+
+
+START TRANSACTION;
+INSERT INTO employees (id, name, salary) VALUES (1, 'Alice', 50000);
+SAVEPOINT SP1;
+ROLLBACK TO SP1;
+COMMIT;
+
+
+START TRANSACTION;
+INSERT INTO employees (id, name, salary) VALUES (2, 'Bob', 60000);
+SAVEPOINT SP2;
+ROLLBACK TO SP2;
+COMMIT;
+
+
+START TRANSACTION;
+INSERT INTO employees (id, name, salary) VALUES (3, 'Charlie', 55000);
+SAVEPOINT SP1;
+INSERT INTO employees (id, name, salary) VALUES (4, 'David', 70000);
+SAVEPOINT SP2;
+ROLLBACK TO SP1;
+COMMIT;
+
+
+START TRANSACTION;
+UPDATE employees SET salary = 65000 WHERE id = 2;
+SAVEPOINT SP3;
+DELETE FROM employees WHERE id = 3;
+SAVEPOINT SP4;
+ROLLBACK TO SP3;
+COMMIT;
+
+
+START TRANSACTION;
+UPDATE employees SET salary = 75000 WHERE id = 1;
+SAVEPOINT SP5;
+ROLLBACK;
+
+COMMIT;
+
+
+START TRANSACTION;
+INSERT INTO employees (id, name, salary) VALUES (5, 'Eve', 80000);
+ROLLBACK;
+
+
+START TRANSACTION;
+UPDATE employees SET salary = 90000 WHERE id = 2;
+UPDATE employees SET salary = 95000 WHERE id = 4;
+ROLLBACK;
+
+
+START TRANSACTION;
+INSERT INTO employees (id, name, salary) VALUES (6, 'Frank', 85000);
+COMMIT;
+
+
+START TRANSACTION;
+UPDATE employees SET salary = 88000 WHERE id = 6;
+COMMIT;
+
+
+START TRANSACTION;
+INSERT INTO employees (id, name, salary) VALUES (7, 'Grace', 92000);
+SAVEPOINT SP6;
+ROLLBACK TO SP6;
+INSERT INTO employees (id, name, salary) VALUES (8, 'Hank', 93000);
+COMMIT;
+
+
+START TRANSACTION;
+UPDATE employees SET salary = 96000 WHERE id = 7;
+SAVEPOINT SP7;
+INSERT INTO departments (id, name) VALUES (1, 'IT');
+ROLLBACK TO SP7;
+COMMIT;
+
+
+START TRANSACTION;
+UPDATE employees SET salary = 98000 WHERE id = 8;
+SAVEPOINT SP8;
+DELETE FROM employees WHERE id = 6;
+ROLLBACK TO SP8;
+COMMIT;
+
+
+START TRANSACTION;
+DELETE FROM employees WHERE id = 5;
+SAVEPOINT SP9;
+ROLLBACK TO SP9;
+COMMIT;
+
